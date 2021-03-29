@@ -1,7 +1,7 @@
 import fs from 'fs'
 import hclParse from 'hcl-to-json'
 
-export async function parse (contents: Buffer | string): Promise<NodeJS.ProcessEnv> {
+export function parse (contents: Buffer | string): NodeJS.ProcessEnv {
   const container: NodeJS.ProcessEnv = {}
 
   contents = typeof contents === 'string' ? contents : contents.toString('utf-8')
@@ -10,7 +10,7 @@ export async function parse (contents: Buffer | string): Promise<NodeJS.ProcessE
   if (contents.startsWith('{')) {
     parsed = JSON.parse(contents)
   } else {
-    parsed = await hclParse(contents)
+    parsed = hclParse(contents)
   }
 
   Object.entries(parsed).forEach(([key, value]) => {
@@ -20,9 +20,9 @@ export async function parse (contents: Buffer | string): Promise<NodeJS.ProcessE
   return container
 }
 
-export async function from (path: string): Promise<void> {
+export function from (path: string): void {
   const buffer = fs.readFileSync(path)
-  const container: NodeJS.ProcessEnv = await parse(buffer)
+  const container: NodeJS.ProcessEnv = parse(buffer)
   process.env = {
     ...process.env,
     ...container

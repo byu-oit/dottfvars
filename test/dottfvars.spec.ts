@@ -1,4 +1,4 @@
-import {resolve} from 'path'
+import { resolve } from 'path'
 import * as env from 'env-var'
 import * as dottfvars from '../src/dottfvars'
 
@@ -19,5 +19,5 @@ test('parses tfvars.json file', async () => {
 })
 
 test('throws when parse fails', async () => {
-  await expect(() => dottfvars.parse('{')).rejects.toThrow()
+  await expect(async () => dottfvars.parse('{')).rejects.toThrow()
 })
