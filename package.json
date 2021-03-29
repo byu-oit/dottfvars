@@ -2,8 +2,8 @@
   "name": "@byu-oit/dottfvars",
   "description": "Loads environment variables from a .tfvars or .tfvars.json file into process.env",
   "version": "0.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/dottfvars.js",
+  "types": "dist/dottfvars.d.ts",
   "scripts": {
     "build": "del dist && tsc",
     "coverage": "npm run test -- --coverage || exit 0",
@@ -26,6 +26,9 @@
   ],
   "author": "Spencer Tuft <stuft2@byu.edu>",
   "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/byu-oit/dottfvars/issues"
   },
