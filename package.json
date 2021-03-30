@@ -1,7 +1,7 @@
 {
   "name": "@byu-oit/dottfvars",
   "description": "Loads environment variables from a .tfvars or .tfvars.json file into process.env",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/dottfvars.js",
   "types": "dist/dottfvars.d.ts",
   "scripts": {
