@@ -1,0 +1,51 @@
+name: Deployment
+
+on:
+  push:
+    branches: [master]
+
+env:
+  node_version: "14"
+
+jobs:
+  publish:
+    name: Publish npm package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Disallow Concurrent Runs
+        uses: byu-oit/github-action-disallow-concurrent-runs@v2
+        with:
+          token: ${{ github.token }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: ${{ env.node_version }}
+          registry-url: https://npm.pkg.github.com
+          scope: '@byu-oit'
+
+      - name: Install
+        run: npm install
+
+      - name: Test
+        run: |
+          npm test
+          npm run coverage
+
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v2.1.4
+#         with:
+#           node-version: ${{ env.node_version }}
+#           registry-url: https://registry.npmjs.org
+#           scope: '@byu-oit'
+
+#       - name: Publish
+#         run: npm publish --access public
