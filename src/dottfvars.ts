@@ -24,7 +24,7 @@ export function from (path: string): void {
   const buffer = fs.readFileSync(path)
   const container: NodeJS.ProcessEnv = parse(buffer)
   process.env = {
-    ...process.env,
-    ...container
+    ...container, // Overwrite .tfvars files with existing contents in process.env
+    ...process.env
   }
 }
