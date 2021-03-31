@@ -11,7 +11,7 @@
     "lint:fix": "ts-standard --fix | snazzy",
     "test": "jest",
     "test:watch": "jest --watch",
-    "prepublishOnly": "npm run lint && npm run build && npm run coverage"
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",

@@ -8,29 +8,21 @@ env:
   node_version: "14"
 
 jobs:
-  publish:
-    name: Publish npm package
+  test:
+    name: Test Module
     runs-on: ubuntu-latest
     steps:
-      - name: Check out
-        uses: actions/checkout@v2
-
-      - name: Disallow Concurrent Runs
-        uses: byu-oit/github-action-disallow-concurrent-runs@v2
-        with:
-          token: ${{ github.token }}
+      - uses: actions/checkout@2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2.1.4
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ env.node_version }}
-          registry-url: https://npm.pkg.github.com
-          scope: '@byu-oit'
 
-      - name: Install
+      - name: npm install
         run: npm install
 
-      - name: Test
+      - name: npm test
         run: |
           npm run coverage
 
@@ -39,18 +31,58 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
+  audit:
+    name: Audit Module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.node_version }}
+
+      - name: npm audit
+        run: npm audit --audit-level=critical
+
+  lint:
+    name: Lint Module
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.node_version }}
+
+      - name: npm install
+        run: npm install
+
+      - name: npm lint
+        run: npm run lint
+
+  publish:
+    needs: [test, audit, lint] # Wait for checks to finish before publishing
+    name: Publish node package
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        registry:
+          - url: https://npm.pkg.github.com
+            token: ${{ secrets.GITHUB_TOKEN }}
+          - url: https://registry.npmjs.org
+            token: ${{ secrets.NPM_TOKEN
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v2.1.4
+        with:
+          node-version: ${{ env.node_version }}
+          registry-url: ${{ matrix.registry.url }}
+          scope: '@byu-oit'
+
+        # The prepublishOnly script builds the package before publishing
       - name: Publish
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v2.1.4
-#         with:
-#           node-version: ${{ env.node_version }}
-#           registry-url: https://registry.npmjs.org
-#           scope: '@byu-oit'
-
-#       - name: Publish
-#         run: npm publish --access public
+          NODE_AUTH_TOKEN: ${{ matrix.registry.token }}

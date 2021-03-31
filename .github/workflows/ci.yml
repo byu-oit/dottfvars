@@ -36,7 +36,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
   audit:
-    name: Audit App
+    name: Audit Module
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -50,7 +50,7 @@ jobs:
         run: npm audit --audit-level=critical
 
   lint:
-    name: Lint App
+    name: Lint Module
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
