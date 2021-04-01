@@ -8,11 +8,33 @@ env:
   node_version: "14"
 
 jobs:
+  env:
+    name: Set Env Vars
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Env Vars
+        run: |
+          matrix='{
+            "registry":[
+              {
+                "token":"NPM_TOKEN",
+                "url":"https://registry.npmjs.org"
+              },
+              {
+                "token":"GITHUB_TOKEN",
+                "url":"https://npm.pkg.github.com"
+              }
+            ]
+          }'
+          echo matrix=`echo $matrix | jq -c .` >> $GITHUB_ENV
+    outputs:
+      matrix: ${{ env.matrix }}
+
   test:
     name: Test Module
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@2
+      - uses: actions/checkout@v2
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -63,17 +85,20 @@ jobs:
         run: npm run lint
 
   publish:
-    needs: [test, audit, lint] # Wait for checks to finish before publishing
+    needs: [env, test, audit, lint] # Wait for checks to finish before publishing
     name: Publish node package
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        registry:
-          - url: https://npm.pkg.github.com
-            token: ${{ secrets.GITHUB_TOKEN }}
-          - url: https://registry.npmjs.org
-            token: ${{ secrets.NPM_TOKEN
+      matrix: ${{ fromJson(needs.env.outputs.matrix) }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Disallow Concurrent Runs
+        uses: byu-oit/github-action-disallow-concurrent-runs@v2
+        with:
+          token: ${{ github.token }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v2.1.4
         with:
@@ -81,8 +106,11 @@ jobs:
           registry-url: ${{ matrix.registry.url }}
           scope: '@byu-oit'
 
+      - name: npm install
+        run: npm install
+
         # The prepublishOnly script builds the package before publishing
       - name: Publish
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ matrix.registry.token }}
+          NODE_AUTH_TOKEN: ${{ secrets[matrix.registry.token] }}
